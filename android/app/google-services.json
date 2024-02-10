@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "239133718278",
+    "project_id": "firetodo-ef52e",
+    "storage_bucket": "firetodo-ef52e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239133718278:android:6cfea3c6dd1490f6e85087",
+        "android_client_info": {
+          "package_name": "com.gdscbootcamp.firetodo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3zPKQ5oxUPmsgQFzxfVTbh4TKTSH-qn4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
