@@ -95,7 +95,7 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
                 FireTodoInputLabel(
                   label: 'Task Description',
                   child: FireTodoTextField(
-                    controller: titleController,
+                    controller: descriptionController,
                     isMultiline: true,
                   ),
                 ),
