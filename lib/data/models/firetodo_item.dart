@@ -9,7 +9,7 @@ class FireTodoItem {
   final FireTodoPriority priority;
   final FireTodoStatus status;
   final String description;
-  final DateTime dateTime;
+  final DateTime date;
 
   FireTodoItem({
     required this.id,
@@ -17,7 +17,7 @@ class FireTodoItem {
     required this.priority,
     required this.status,
     required this.description,
-    required this.dateTime,
+    required this.date,
   });
 
   factory FireTodoItem.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,7 @@ class FireTodoItem {
       priority: FireTodoPriority.fromId(json['priority'] as int),
       status: FireTodoStatus.fromId(json['status'] as int),
       description: json['description'] as String,
-      dateTime: DateTime.parse(json['dateTime']),
+      date: DateTime.parse(json['dateTime']),
     );
   }
 
@@ -38,7 +38,25 @@ class FireTodoItem {
       'priority': priority.id,
       'status': status.id,
       'description': description,
-      'dateTime': dateTime.toString(),
+      'dateTime': date.toString(),
     };
+  }
+
+  FireTodoItem copyWith({
+    String? id,
+    String? title,
+    FireTodoPriority? priority,
+    FireTodoStatus? status,
+    String? description,
+    DateTime? date,
+  }) {
+    return FireTodoItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      priority: priority ?? this.priority,
+      status: status ?? this.status,
+      description: description ?? this.description,
+      date: date ?? this.date,
+    );
   }
 }

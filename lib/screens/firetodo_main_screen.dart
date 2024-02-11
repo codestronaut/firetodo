@@ -20,33 +20,21 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
     DateTime.now().day,
   );
 
-  // TODO: 4. Delete these data when not used anymore
-  final dummyTodos = [
-    (
-      title: 'Daily meeting with team',
-      priority: FireTodoPriority.high,
-      status: FireTodoStatus.complete,
-    ),
-    (
-      title: 'Check emails',
-      priority: FireTodoPriority.low,
-      status: FireTodoStatus.incomplete,
-    ),
-    (
-      title: 'Evening workout',
-      priority: FireTodoPriority.medium,
-      status: FireTodoStatus.incomplete,
-    ),
-  ];
-
   @override
   void initState() {
     getTodoList();
     super.initState();
   }
 
-  void getTodoList() async {
-    // TODO: 1. Call provider method to get todolist data on current date
+  void getTodoList() {
+    Future.microtask(() {
+      Provider.of<FireTodoListNotifier>(
+        context,
+        listen: false,
+      ).getTodoList(
+        date: viewedDateTime,
+      );
+    });
   }
 
   @override
@@ -68,12 +56,11 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
                 onDateSelected: (date) {
                   if (date != null) {
                     setState(() => viewedDateTime = date);
-                    // TODO: 3. Load todolist data based on selected date
+                    getTodoList();
                   }
                 },
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.only(
                 left: FireTodoSpacings.spacingMd,
@@ -101,9 +88,11 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
                         ),
                         child: Consumer<FireTodoListNotifier>(
                           builder: (context, data, child) {
+                            final ongoing = data.todoList
+                                .where((item) => item.status.isIncomplete)
+                                .toList();
                             return Text(
-                              // TODO: 3. Consume the actual todolist count
-                              dummyTodos.length.toString(),
+                              ongoing.length.toString(),
                               style: FireTodoTextStyles.bold.copyWith(
                                 color: FireTodoColors.mindfulOrange,
                                 fontSize: FireTodoSpacings.spacingMd,
@@ -120,30 +109,62 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
                 ),
               ),
             ),
+            Consumer<FireTodoListNotifier>(
+              builder: (context, data, child) {
+                return ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(FireTodoSpacings.spacingMd),
+                  itemCount: data.todoList.length,
+                  itemBuilder: (context, index) {
+                    final todo = data.todoList[index];
 
-            // TODO: 2. Consume the actual todolist data
-            // Consumer<FireTodoListNotifier>(
-            //   builder: (context, data, child) {
-            //     return SizedBox();
-            //   },
-            // ),
+                    return FireTodoCard(
+                      onTap: () async {
+                        if (todo.status.isComplete) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Task already complete'),
+                            ),
+                          );
+                        } else {
+                          await showModalBottomSheet(
+                            context: context,
+                            useSafeArea: true,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return FireTodoNewBottomSheet(
+                                date: viewedDateTime,
+                                todoItem: todo,
+                              );
+                            },
+                          );
 
-            ListView.separated(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(FireTodoSpacings.spacingMd),
-              itemCount: dummyTodos.length,
-              itemBuilder: (context, index) {
-                final dummyTodo = dummyTodos[index];
+                          getTodoList();
+                        }
+                      },
+                      title: todo.title,
+                      priority: todo.priority,
+                      status: todo.status,
+                      onComplete: () {
+                        Provider.of<FireTodoListNotifier>(
+                          context,
+                          listen: false,
+                        ).addUpdateTodo(
+                          todo.copyWith(
+                            status: todo.status.isIncomplete
+                                ? FireTodoStatus.complete
+                                : FireTodoStatus.incomplete,
+                          ),
+                        );
 
-                return FireTodoCard(
-                  title: dummyTodo.title,
-                  priority: dummyTodo.priority,
-                  status: dummyTodo.status,
-                  onComplete: () {},
+                        getTodoList();
+                      },
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: FireTodoSpacings.spacingMd);
+                  },
                 );
-              },
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: FireTodoSpacings.spacingMd);
               },
             ),
           ],
@@ -154,8 +175,8 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
         backgroundColor: FireTodoColors.mindfulOrange,
         icon: const Icon(Icons.add),
         label: const Text('Todo List'),
-        onPressed: () {
-          showModalBottomSheet(
+        onPressed: () async {
+          await showModalBottomSheet(
             context: context,
             useSafeArea: true,
             isScrollControlled: true,
@@ -163,6 +184,8 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
               return FireTodoNewBottomSheet(date: viewedDateTime);
             },
           );
+
+          getTodoList();
         },
       ),
     );

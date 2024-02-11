@@ -7,10 +7,17 @@ import 'package:firetodo/widgets/firetodo_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class FireTodoNewBottomSheet extends StatefulWidget {
-  const FireTodoNewBottomSheet({super.key, required this.date});
+  const FireTodoNewBottomSheet({
+    super.key,
+    required this.date,
+    this.todoItem,
+  });
+
   final DateTime date;
+  final FireTodoItem? todoItem;
 
   @override
   State<FireTodoNewBottomSheet> createState() => _FireTodoNewBottomSheetState();
@@ -22,9 +29,67 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
   var selectedPriority = FireTodoPriority.low;
 
   @override
-  Widget build(BuildContext context) {
-    print(widget.date.toString());
+  void initState() {
+    loadTodo();
+    super.initState();
+  }
 
+  void loadTodo() {
+    if (widget.todoItem != null) {
+      final todoItem = widget.todoItem!;
+      titleController.text = todoItem.title;
+      descriptionController.text = todoItem.description;
+      selectedPriority = todoItem.priority;
+    }
+  }
+
+  void addTodo() {
+    Provider.of<FireTodoListNotifier>(
+      context,
+      listen: false,
+    ).addUpdateTodo(
+      FireTodoItem(
+        id: const Uuid().v4(),
+        title: titleController.text,
+        priority: selectedPriority,
+        status: FireTodoStatus.incomplete,
+        description: descriptionController.text,
+        date: widget.date,
+      ),
+    );
+  }
+
+  void updateTodo() {
+    if (widget.todoItem != null) {
+      final todoItem = widget.todoItem!;
+      Provider.of<FireTodoListNotifier>(
+        context,
+        listen: false,
+      ).addUpdateTodo(
+        FireTodoItem(
+          id: todoItem.id,
+          title: titleController.text,
+          priority: selectedPriority,
+          status: FireTodoStatus.incomplete,
+          description: descriptionController.text,
+          date: todoItem.date,
+        ),
+      );
+    }
+  }
+
+  void deleteTodo() {
+    if (widget.todoItem != null) {
+      final todoItem = widget.todoItem!;
+      Provider.of<FireTodoListNotifier>(
+        context,
+        listen: false,
+      ).deleteTodo(todoItem);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -43,7 +108,7 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'New Task',
+                widget.todoItem == null ? 'New Task' : 'Edit Task',
                 style: FireTodoTextStyles.semiBold.copyWith(
                   fontSize: FireTodoSpacings.spacingLg,
                 ),
@@ -74,7 +139,6 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
             padding: const EdgeInsets.all(FireTodoSpacings.spacingMd),
             child: Column(
               children: [
-                // TODO: 1. Implement input todolist task title
                 FireTodoInputLabel(
                   isRequired: true,
                   label: 'Task Title',
@@ -84,7 +148,6 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
                   ),
                 ),
                 const SizedBox(height: FireTodoSpacings.spacingMd),
-                // TODO: 2. Implement input todolist task priority
                 FireTodoInputLabel(
                   isRequired: true,
                   label: 'Priority',
@@ -96,7 +159,6 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
                   ),
                 ),
                 const SizedBox(height: FireTodoSpacings.spacingMd),
-                // TODO: 3. Implement input todolist task description
                 FireTodoInputLabel(
                   label: 'Task Description',
                   child: FireTodoTextField(
@@ -105,45 +167,63 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
                   ),
                 ),
                 const SizedBox(height: FireTodoSpacings.spacingXlg),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Consumer<FireTodoListNotifier>(
-                    builder: (context, data, child) {
-                      /// The button state will change based on the notifier.
-                      return ElevatedButton(
-                        onPressed: () {
-                          // TODO: 4. Implement save todo
-                          // TODO: 5. Refresh todo list data
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: FireTodoColors.mindfulBrown,
-                          padding: const EdgeInsets.all(
-                            FireTodoSpacings.spacingMd,
+                Consumer<FireTodoListNotifier>(
+                  builder: (context, data, child) {
+                    return Row(
+                      children: [
+                        if (widget.todoItem != null)
+                          IconButton(
+                            onPressed: () {
+                              deleteTodo();
+                              Navigator.of(context).pop();
+                            },
+                            icon: const Icon(Icons.delete_outline),
                           ),
-                          textStyle: FireTodoTextStyles.semiBold.copyWith(
-                            fontSize: FireTodoSpacings.spacingLg,
-                            color: Colors.white,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Save'),
-                            const SizedBox(width: FireTodoSpacings.spacingXs),
-                            SvgPicture.asset(
-                              'assets/icons/ic-arrow-right.svg',
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
+                        if (widget.todoItem != null)
+                          const SizedBox(width: FireTodoSpacings.spacingMd),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (widget.todoItem != null) {
+                                updateTodo();
+                              } else {
+                                addTodo();
+                              }
+
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: FireTodoColors.mindfulBrown,
+                              padding: const EdgeInsets.all(
+                                FireTodoSpacings.spacingMd,
+                              ),
+                              textStyle: FireTodoTextStyles.semiBold.copyWith(
+                                fontSize: FireTodoSpacings.spacingLg,
+                                color: Colors.white,
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Save'),
+                                const SizedBox(
+                                  width: FireTodoSpacings.spacingXs,
+                                ),
+                                SvgPicture.asset(
+                                  'assets/icons/ic-arrow-right.svg',
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.white,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

@@ -45,7 +45,7 @@ class FireTodoListNotifier extends ChangeNotifier {
 
     try {
       await FirebaseFirestore.instance
-          .collection(todo.dateTime.toString())
+          .collection(todo.date.toString())
           .doc(todo.id)
           .set(todo.toJson());
       _todoState = FireTodoRequestState.success;
@@ -64,7 +64,7 @@ class FireTodoListNotifier extends ChangeNotifier {
 
     try {
       await FirebaseFirestore.instance
-          .collection(todo.dateTime.toString())
+          .collection(todo.date.toString())
           .doc(todo.id)
           .delete();
       _todoState = FireTodoRequestState.success;
