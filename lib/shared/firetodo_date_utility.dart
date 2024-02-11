@@ -23,6 +23,6 @@ class FireTodoDateUtility {
 
   static List<List<DateTime>> getDatesInMonthWeekly(DateTime date) {
     final listOfDates = getDatesInMonth(date);
-    return listOfDates.slice(3, 17).slices(7).toList();
+    return listOfDates.slice(10, 24).slices(7).toList();
   }
 }

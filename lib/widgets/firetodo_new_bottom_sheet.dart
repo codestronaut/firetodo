@@ -1,13 +1,16 @@
 import 'package:firetodo/data/data.dart';
+import 'package:firetodo/providers/providers.dart';
 import 'package:firetodo/shared/shared.dart';
 import 'package:firetodo/widgets/firetodo_input_label.dart';
 import 'package:firetodo/widgets/firetodo_priority_picker.dart';
 import 'package:firetodo/widgets/firetodo_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class FireTodoNewBottomSheet extends StatefulWidget {
-  const FireTodoNewBottomSheet({super.key});
+  const FireTodoNewBottomSheet({super.key, required this.date});
+  final DateTime date;
 
   @override
   State<FireTodoNewBottomSheet> createState() => _FireTodoNewBottomSheetState();
@@ -20,6 +23,8 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.date.toString());
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -102,31 +107,42 @@ class _FireTodoNewBottomSheetState extends State<FireTodoNewBottomSheet> {
                 const SizedBox(height: FireTodoSpacings.spacingXlg),
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: FireTodoColors.mindfulBrown,
-                      padding: const EdgeInsets.all(FireTodoSpacings.spacingMd),
-                      textStyle: FireTodoTextStyles.semiBold.copyWith(
-                        fontSize: FireTodoSpacings.spacingLg,
-                        color: Colors.white,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Save'),
-                        const SizedBox(width: FireTodoSpacings.spacingXs),
-                        SvgPicture.asset(
-                          'assets/icons/ic-arrow-right.svg',
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
+                  child: Consumer<FireTodoListNotifier>(
+                    builder: (context, data, child) {
+                      /// The button state will change based on the notifier.
+                      return ElevatedButton(
+                        onPressed: () {
+                          // TODO: 4. Implement save todo
+                          // TODO: 5. Refresh todo list data
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: FireTodoColors.mindfulBrown,
+                          padding: const EdgeInsets.all(
+                            FireTodoSpacings.spacingMd,
+                          ),
+                          textStyle: FireTodoTextStyles.semiBold.copyWith(
+                            fontSize: FireTodoSpacings.spacingLg,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('Save'),
+                            const SizedBox(width: FireTodoSpacings.spacingXs),
+                            SvgPicture.asset(
+                              'assets/icons/ic-arrow-right.svg',
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

@@ -1,8 +1,10 @@
 import 'package:firetodo/data/data.dart';
+import 'package:firetodo/providers/providers.dart';
 import 'package:firetodo/shared/shared.dart';
 import 'package:firetodo/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 class FireTodoMainScreen extends StatefulWidget {
   const FireTodoMainScreen({super.key});
@@ -12,6 +14,13 @@ class FireTodoMainScreen extends StatefulWidget {
 }
 
 class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
+  var viewedDateTime = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
+
+  // TODO: 4. Delete these data when not used anymore
   final dummyTodos = [
     (
       title: 'Daily meeting with team',
@@ -31,6 +40,16 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
   ];
 
   @override
+  void initState() {
+    getTodoList();
+    super.initState();
+  }
+
+  void getTodoList() async {
+    // TODO: 1. Call provider method to get todolist data on current date
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +66,10 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
               height: 120.0,
               child: FireTodoCalendar(
                 onDateSelected: (date) {
-                  // TODO: 3. Load todolist data based on selected date
+                  if (date != null) {
+                    setState(() => viewedDateTime = date);
+                    // TODO: 3. Load todolist data based on selected date
+                  }
                 },
               ),
             ),
@@ -77,13 +99,17 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
                           color: FireTodoColors.mindfulOrange.withOpacity(0.2),
                           shape: const StadiumBorder(),
                         ),
-                        child: Text(
-                          // TODO: 2. Consume the actual todolist count data
-                          dummyTodos.length.toString(),
-                          style: FireTodoTextStyles.bold.copyWith(
-                            color: FireTodoColors.mindfulOrange,
-                            fontSize: FireTodoSpacings.spacingMd,
-                          ),
+                        child: Consumer<FireTodoListNotifier>(
+                          builder: (context, data, child) {
+                            return Text(
+                              // TODO: 3. Consume the actual todolist count
+                              dummyTodos.length.toString(),
+                              style: FireTodoTextStyles.bold.copyWith(
+                                color: FireTodoColors.mindfulOrange,
+                                fontSize: FireTodoSpacings.spacingMd,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -95,7 +121,13 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
               ),
             ),
 
-            // TODO: 1. Consume the actual todolist data
+            // TODO: 2. Consume the actual todolist data
+            // Consumer<FireTodoListNotifier>(
+            //   builder: (context, data, child) {
+            //     return SizedBox();
+            //   },
+            // ),
+
             ListView.separated(
               shrinkWrap: true,
               padding: const EdgeInsets.all(FireTodoSpacings.spacingMd),
@@ -128,7 +160,7 @@ class _FireTodoMainScreenState extends State<FireTodoMainScreen> {
             useSafeArea: true,
             isScrollControlled: true,
             builder: (context) {
-              return const FireTodoNewBottomSheet();
+              return FireTodoNewBottomSheet(date: viewedDateTime);
             },
           );
         },
